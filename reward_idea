@@ -1,0 +1,33 @@
+Rewards: 
+Kill player    +10
+Die   :(       -10
+Get in house   +20
+Get outside    +5
+Win   :)       +100
+Lose  :(       -100
+
+
+
+Actions:
+-> move piece 1
+-> move piece 2
+-> move piece 3
+-> move piece 4
+
+
+
+States:
+[list with all payer positions]
+[dice roll]
+[available moves]
+
+no no no... The states are not good :|
+
+Like the problem is waaaay more complicated. I still have to study like 2-3 days more for this.
+
+I'll look tomorrow for the solution. Very sad day :(
+
+I should just make a journal I guess.
+
+Holy shit, the bot is sooooo stupid :P (WTF????)
+
