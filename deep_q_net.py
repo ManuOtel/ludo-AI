@@ -1,7 +1,9 @@
 import torch
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import os
 
 
 class DeepQNetwork(nn.Module):
@@ -12,29 +14,39 @@ class DeepQNetwork(nn.Module):
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
+        # self.fc1.weight.data.fill_(1)
+        # self.fc1.bias.data.fill_(1)
+        self.bn1 = nn.BatchNorm1d(self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
+        # self.fc2.weight.data.fill_(1)
+        # self.fc2.bias.data.fill_(1)
+        self.bn2 = nn.BatchNorm1d(self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
+        # self.fc3.weight.data.fill_(1)
+        # self.fc3.bias.data.fill_(1)
+        self.bn3 = nn.BatchNorm1d(self.n_actions)
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
-        self.loss = nn.MSELoss()
+        self.loss = nn.SmoothL1Loss()
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.to(self.device)
 
     def forward(self, state, action_space):
         action_space = torch.tensor(action_space).to(self.device)
-        x = F.leaky_relu(self.fc1(state))
-        x = F.leaky_relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
+        state = state.to(self.device)
+        x = F.relu(self.bn1(self.fc1(state)))
+        x = F.relu(self.bn2(self.fc2(x)))
+        x = F.relu(self.bn3(self.fc3(x)))
         # print(x)
         # print(action_space)
-        actions = torch.mul(torch.add(x, 0.01), action_space)
+        actions = torch.mul(torch.add(x, 0.0001), action_space)
         # print(actions)
 
         return actions
 
 
 class Agent:
-    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, max_mem_size=int(1e08), eps_end=0.001,
-                 eps_dec=1e-4):
+    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, max_mem_size=int(3e04), eps_end=0.01,
+                 eps_dec=2e-4):
         self.gamma = gamma
         self.epsilon = epsilon
         self.eps_end = eps_end
@@ -45,7 +57,7 @@ class Agent:
         self.mem_size = max_mem_size
         self.mem_cntr = 0
 
-        self.Q_eval = DeepQNetwork(lr=self.lr, n_actions=4, input_dims=input_dims, fc1_dims=128, fc2_dims=64)
+        self.Q_eval = DeepQNetwork(lr=self.lr, n_actions=4, input_dims=input_dims, fc1_dims=128, fc2_dims=128)
 
         self.state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
         self.new_state_memory = np.zeros((self.mem_size, input_dims), dtype=np.float32)
@@ -70,7 +82,8 @@ class Agent:
 
     def choose_action(self, observation, action_space):
         if np.random.random() > self.epsilon:
-            state = torch.tensor(observation.flatten()).to(self.Q_eval.device)
+            # print(np.shape(observation))
+            state = torch.tensor([observation]).to(self.Q_eval.device)
             state = state.float()
             actions = self.Q_eval.forward(state, action_space)
             action = torch.argmax(actions).item()
@@ -117,3 +130,13 @@ class Agent:
         self.Q_eval.optimizer.step()
 
         self.epsilon = self.epsilon - self.eps_dec if self.epsilon > self.eps_end else self.eps_end
+
+    def save(self, path=os.getcwd(), name='neural_network'):
+        self.Q_eval.eval()
+        torch.save(self.Q_eval.state_dict(), name+'.pth')
+        return True
+
+    def load(self, path=os.getcwd(), name='neural_network'):
+        self.Q_eval.load_state_dict(torch.load(name+'.pth'), strict=False)
+        self.Q_eval.to(self.Q_eval.device)
+        self.Q_eval.eval()
