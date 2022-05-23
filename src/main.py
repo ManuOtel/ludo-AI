@@ -8,7 +8,8 @@ from deep_q_net import Agent
 
 f = open(os.getcwd() + '/game_stats_random.csv', 'w')
 writer = csv.writer(f)
-header = ['number_of_game', 'winner', 'cur_reward', 'avg100_reward', 'avgall_reward', 'epsilon']
+header = ['number_of_game', 'winner', 'cur_reward', 'avg100_reward', 'avgall_reward', 'epsilon', 'win3', 'win2', 'win1',
+          'avg3', 'avg2', 'avg1']
 torch.cuda.empty_cache()
 g = ludopy.Game()
 agent = Agent(gamma=0.10, epsilon=1, batch_size=int(3e04), eps_end=0.01, input_dims=17, lr=0.01)
@@ -145,7 +146,8 @@ def learn_games(number_of_game, learn=True, players_blocked=0):
     writer.writerow(header)
     for i in tqdm(range(0, number_of_game), desc="Current game"):
         game_winner, score, avg_score_cur, all_avg = one_game(learn, players_blocked=players_blocked)
-        winrates, avg_rewards = test()
+        if i%100==0:
+            winrates, avg_rewards = test()
         wins[game_winner] += 1
         writer.writerow([str(i), str(game_winner), str(score), str(avg_score_cur), str(all_avg), str(agent.epsilon), 
                          str(winrates[0]), str(winrates[1]), str(winrates[2]), str(avg_rewards[0]), str(avg_rewards[1]), str(avg_rewards[2])])
@@ -163,7 +165,7 @@ def learn_games(number_of_game, learn=True, players_blocked=0):
     return wins
 
 
-def test(number_of_game=10):
+def test(number_of_game=100):
     avg_rewards = [0, 0, 0]
     winrates = [0, 0, 0]
     for j in range(3):
@@ -188,6 +190,7 @@ if __name__ == '__main__':
     print('Teaching Win-rate: ' + str(stats[0] / number_of_games * 100) + '%')
     number_of_games = 500
     agent.epsilon = 0
-    stats2 = play_games(number_of_games, learn=False)
-    print('True Win-rate: ' + str(stats2[0] / number_of_games * 100) + '%')
+    agent.Q_eval.eval()
+    winrates, rewards = test(number_of_game=5000)
+    print('True Win-rate: ' + str(winrates[0]) + '%')
     f.close()
