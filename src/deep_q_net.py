@@ -1,7 +1,19 @@
+"""Ludo AI project.
+
+This module contains the script that creates the DQN architecture for the Ludo AI project.
+
+@Author: Emanuel-Ionut Otel
+@Company: University of Southern Denmark
+@Created: 2022-06-15
+@Contact: emote21@student.sdu.dk
+"""
+
+#### ---- IMPORTS AREA ---- ####
 import torch, os
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+#### ---- IMPORTS AREA ---- ####
 
 
 class DeepQNetwork(nn.Module):
