@@ -117,7 +117,7 @@ def get_action_space(move_pieces: np.ndarray) -> List:
     return action_space
 
 
-def one_game(learn:bool=True, players_blocked:int=0) -> Tuple[int, float, float, float]:
+def one_game(learn:bool=True, players_blocked:int=0) -> Tuple:
     """This function plays one game of Ludo.
 
     :param learn: If the agent should learn from the game
