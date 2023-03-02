@@ -1,9 +1,7 @@
-import torch
-import torch
+import torch, os
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-import os
 
 
 class DeepQNetwork(nn.Module):
@@ -14,16 +12,10 @@ class DeepQNetwork(nn.Module):
         self.fc2_dims = fc2_dims
         self.n_actions = n_actions
         self.fc1 = nn.Linear(self.input_dims, self.fc1_dims)
-        # self.fc1.weight.data.fill_(1)
-        # self.fc1.bias.data.fill_(1)
         self.bn1 = nn.BatchNorm1d(self.fc1_dims)
         self.fc2 = nn.Linear(self.fc1_dims, self.fc2_dims)
-        # self.fc2.weight.data.fill_(1)
-        # self.fc2.bias.data.fill_(1)
         self.bn2 = nn.BatchNorm1d(self.fc2_dims)
         self.fc3 = nn.Linear(self.fc2_dims, self.n_actions)
-        # self.fc3.weight.data.fill_(1)
-        # self.fc3.bias.data.fill_(1)
         self.bn3 = nn.BatchNorm1d(self.n_actions)
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         self.loss = nn.SmoothL1Loss()
@@ -36,10 +28,7 @@ class DeepQNetwork(nn.Module):
         x = F.relu(self.bn1(self.fc1(state)))
         x = F.relu(self.bn2(self.fc2(x)))
         x = F.relu(self.bn3(self.fc3(x)))
-        # print(x)
-        # print(action_space)
         actions = torch.mul(torch.add(x, 0.0001), action_space)
-        # print(actions)
 
         return actions
 
@@ -66,7 +55,7 @@ class Agent:
         self.action_space_memory = np.zeros((self.mem_size, 4), dtype=np.int32)
         self.new_action_space_memory = np.zeros((self.mem_size, 4), dtype=np.int32)
         self.reward_memory = np.zeros(self.mem_size, dtype=np.float32)
-        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)
+        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool_)
 
     def store_transition(self, state, action, reward, state_, action_space, action_space_, done):
         index = self.mem_cntr % self.mem_size
