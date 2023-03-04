@@ -12,7 +12,7 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the req
 pip install -r requirements.txt
 ```
 
-Also for experiencing the full capabilities of the project, there might be a need to have an NVidia Graphix Card with CUDA compatibility. More details about it can be found [here](https://developer.nvidia.com/cuda-gpus)
+Also for experiencing the full capabilities of the project, there might be a need to have an Nvidia graphics card with CUDA compatibility. More details about it can be found [here](https://developer.nvidia.com/cuda-gpus)
 
 ## Usage
 
