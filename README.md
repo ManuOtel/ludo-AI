@@ -25,4 +25,4 @@ python main.py
 
 ## Contact
 
-For further discussions, ideas, or collaborations please contact: [emote21@student.sdu.dk](emote21@student.sdu.dk)
+For further discussions, ideas, or collaborations please contact: [emote21@student.sdu.dk](mailto:emote21@student.sdu.dk)
